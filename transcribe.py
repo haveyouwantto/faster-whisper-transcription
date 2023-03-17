@@ -2,11 +2,12 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('audio_files', nargs='+', help='Audio files to transcribe')
-parser.add_argument('--model_path', default='whisper-large-v2-ct2/', help='Path to model (default: whisper-large-v2-ct2/)')
-parser.add_argument('--device', default='cuda', help='Device to use for inference (default: cuda)')
+parser.add_argument('--model_path','-m', default='whisper-large-v2-ct2/', help='Path to model (default: whisper-large-v2-ct2/)')
+parser.add_argument('--device','-d', default='cuda', help='Device to use for inference (default: cuda)')
 parser.add_argument('--compute_type', default='float16', help='Compute type for inference (default: float16)')
 parser.add_argument('--no-translate', action='store_true', help='Disable automatic translation')
-parser.add_argument('--force-overwrite', action='store_true', help='If set, the program will overwrite any existing output files. If not set (default behavior), the program will skip writing to an output file that already exists.')
+parser.add_argument('--trans-word-ts', action='store_true', help='If set, the program will generate word-level timestamps for translations. Default is false.')
+parser.add_argument('--force-overwrite','-f', action='store_true', help='If set, the program will overwrite any existing output files. If not set (default behavior), the program will skip writing to an output file that already exists.')
 args = parser.parse_args()
 
 import os
@@ -87,30 +88,34 @@ def gen_subtitles(segments, outname, append=False):
             # Iterate through each word in the segment and generate the corresponding subtitle lines
             pos = 0
             last_end = segment.start
-            for word in segment.words:
-                st = word.start
-                ed = word.end
-                start_time = format_ass_time(st)
-                end_time = format_ass_time(ed)
+            if segment.words is not None:
+                for word in segment.words:
+                    st = word.start
+                    ed = word.end
+                    start_time = format_ass_time(st)
+                    end_time = format_ass_time(ed)
 
-                # If the current word starts after the end of the last word, generate a subtitle line for the gap
-                if st > last_end:
-                    line = f"Dialogue: 0,{format_ass_time(last_end)},{format_ass_time(st)},{style},,0,0,0,,{segment.text}"
+                    # If the current word starts after the end of the last word, generate a subtitle line for the gap
+                    if st > last_end:
+                        line = f"Dialogue: 0,{format_ass_time(last_end)},{format_ass_time(st)},{style},,0,0,0,,{segment.text}"
+                        t.write(line+'\n')
+
+                    # Insert the formatting codes for the word in the segment text
+                    wordlen = len(word.word)
+                    text = list(segment.text)
+                    text.insert(pos+wordlen, '{\c}')
+                    text.insert(pos, '{\c&H9628E6&}')
+
+                    # Create the subtitle line for the word
+                    line = f"Dialogue: 0,{start_time},{end_time},{style},,0,0,0,,{''.join(text)}"
                     t.write(line+'\n')
+                    pos += wordlen
 
-                # Insert the formatting codes for the word in the segment text
-                wordlen = len(word.word)
-                text = list(segment.text)
-                text.insert(pos+wordlen, '{\c}')
-                text.insert(pos, '{\c&H9628E6&}')
-
-                # Create the subtitle line for the word
-                line = f"Dialogue: 0,{start_time},{end_time},{style},,0,0,0,,{''.join(text)}"
+                    # Set the end time of the last word to the current word's end time
+                    last_end = ed
+            else:
+                line = f"Dialogue: 0,{format_ass_time(segment.start)},{format_ass_time(segment.end)},{style},,0,0,0,,{segment.text}"
                 t.write(line+'\n')
-                pos += wordlen
-
-                # Set the end time of the last word to the current word's end time
-                last_end = ed
     
     # Handling of https://github.com/guillaumekln/faster-whisper/issues/50
     except IndexError as e:
@@ -128,7 +133,7 @@ for audio_file in args.audio_files:
     print('Transcribing '+name)
 
     # Transcribe the audio using the provided model
-    segments, info = model.transcribe(audio_file, beam_size=5, word_timestamps=True, )
+    segments, info = model.transcribe(audio_file, beam_size=5, word_timestamps=True)
     
     # Print the detected language and its probability
     print(f"Detected language '{info.language}' with probability {info.language_probability}")
@@ -142,7 +147,7 @@ for audio_file in args.audio_files:
 
         # If the detected language is not English, transcribe the audio using translation
         if not args.no_translate and info.language != 'en':
-            segments, info = model.transcribe(audio_file, beam_size=5, task='translate', word_timestamps=True)
+            segments, info = model.transcribe(audio_file, beam_size=5, language=info.language, task='translate', word_timestamps=args.trans_word_ts)
 
             # output_file = f"{name}.en.translated"
 
