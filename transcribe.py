@@ -56,7 +56,7 @@ def format_ass_time(seconds):
 def gen_subtitles(segments, outname, append=False):
     # Open the output file for writing or appending
     filename = outname + '.ass'
-    if args.force_overwrite or (not os.path.exists(filename) and not append):
+    if args.force_overwrite or (not os.path.exists(filename) or append):
         t = open(filename, 'a' if append else 'w', encoding='utf-8')
 
         # Write the ASS subtitle file header
