@@ -6,8 +6,10 @@ parser.add_argument('--model_path', default='whisper-large-v2-ct2/', help='Path 
 parser.add_argument('--device', default='cuda', help='Device to use for inference (default: cuda)')
 parser.add_argument('--compute_type', default='float16', help='Compute type for inference (default: float16)')
 parser.add_argument('--no-translate', action='store_true', help='Disable automatic translation')
+parser.add_argument('--force-overwrite', action='store_true', help='If set, the program will overwrite any existing output files. If not set (default behavior), the program will skip writing to an output file that already exists.')
 args = parser.parse_args()
 
+import os
 from faster_whisper import WhisperModel
 model = WhisperModel(args.model_path, device=args.device, compute_type=args.compute_type)
 
@@ -53,74 +55,84 @@ def format_ass_time(seconds):
 # should be appended to an existing file instead of overwriting it.
 def gen_subtitles(segments, outname, append=False):
     # Open the output file for writing or appending
-    t = open(outname + '.ass', 'a' if append else 'w', encoding='utf-8')
+    filename = outname + '.ass'
+    if args.force_overwrite or not os.path.exists(filename):
+        t = open(filename, 'a' if append else 'w', encoding='utf-8')
 
-    # Write the ASS subtitle file header
-    if not append:
-        t.write(ass_header)
+        # Write the ASS subtitle file header
+        if not append:
+            t.write(ass_header)
 
-    # Set the style based on whether the subtitle is being appended or not
-    style = 'Small' if append else 'Default'
+        # Set the style based on whether the subtitle is being appended or not
+        style = 'Small' if append else 'Default'
 
-    # Iterate through each segment and generate the corresponding subtitle lines
-    for i, segment in enumerate(segments):
-        # Format the start and end times for the subtitle line
-        start_time = format_srt_time(segment.start)
-        end_time = format_srt_time(segment.end)
+        try:
+            # Iterate through each segment and generate the corresponding subtitle lines
+            for i, segment in enumerate(segments):
+                # Format the start and end times for the subtitle line
+                start_time = format_srt_time(segment.start)
+                end_time = format_srt_time(segment.end)
 
-        # Replace any newline characters in the segment text with a space
-        text = segment.text.replace('\n', ' ')
+                # Replace any newline characters in the segment text with a space
+                text = segment.text.replace('\n', ' ')
 
-        # Create the subtitle line with the index, start and end times, and segment text
-        line = f"{i+1}\n{start_time} --> {end_time}\n{text}"
+                # Create the subtitle line with the index, start and end times, and segment text
+                line = f"{i+1}\n{start_time} --> {end_time}\n{text}"
 
-        # Print the segment information to the console
-        print("[%s -> %s] %s" % (start_time, end_time, segment.text))
+                # Print the segment information to the console
+                print("[%s -> %s] %s" % (start_time, end_time, segment.text))
 
-        # Write the subtitle line to the output file
-        # f.write(line+'\n\n')
+                # Write the subtitle line to the output file
+                # f.write(line+'\n\n')
 
+                # if word_ts:
+                # Iterate through each word in the segment and generate the corresponding subtitle lines
+                pos = 0
+                last_end = segment.start
+                for word in segment.words:
+                    st = word.start
+                    ed = word.end
+                    start_time = format_ass_time(st)
+                    end_time = format_ass_time(ed)
+
+                    # If the current word starts after the end of the last word, generate a subtitle line for the gap
+                    if st > last_end:
+                        line = f"Dialogue: 0,{format_ass_time(last_end)},{format_ass_time(st)},{style},,0,0,0,,{segment.text}"
+                        t.write(line+'\n')
+
+                    # Insert the formatting codes for the word in the segment text
+                    wordlen = len(word.word)
+                    text = list(segment.text)
+                    text.insert(pos+wordlen, '{\c}')
+                    text.insert(pos, '{\c&H9628E6&}')
+
+                    # Create the subtitle line for the word
+                    line = f"Dialogue: 0,{start_time},{end_time},{style},,0,0,0,,{''.join(text)}"
+                    t.write(line+'\n')
+                    pos += wordlen
+
+                    # Set the end time of the last word to the current word's end time
+                    last_end = ed
+        
+        # Handling of https://github.com/guillaumekln/faster-whisper/issues/50
+        except IndexError:
+            print(IndexError)
+        
+        # Close the output file
+        # f.close()
         # if word_ts:
-        # Iterate through each word in the segment and generate the corresponding subtitle lines
-        pos = 0
-        last_end = segment.start
-        for word in segment.words:
-            st = word.start
-            ed = word.end
-            start_time = format_ass_time(st)
-            end_time = format_ass_time(ed)
-
-            # If the current word starts after the end of the last word, generate a subtitle line for the gap
-            if st > last_end:
-                line = f"Dialogue: 0,{format_ass_time(last_end)},{format_ass_time(st)},{style},,0,0,0,,{segment.text}"
-                t.write(line+'\n')
-
-            # Insert the formatting codes for the word in the segment text
-            wordlen = len(word.word)
-            text = list(segment.text)
-            text.insert(pos+wordlen, '{\c}')
-            text.insert(pos, '{\c&H9628E6&}')
-
-            # Create the subtitle line for the word
-            line = f"Dialogue: 0,{start_time},{end_time},{style},,0,0,0,,{''.join(text)}"
-            t.write(line+'\n')
-            pos += wordlen
-
-            # Set the end time of the last word to the current word's end time
-            last_end = ed
-    
-    # Close the output file
-    # f.close()
-    # if word_ts:
-    t.close()
+        t.close()
+    else:
+        f"Skipping {filename} (file already exists). Use --force-overwrite to overwrite existing files."
 
 # Iterate through each audio file provided in the command line arguments
 for audio_file in args.audio_files:
     # Extract the name of the file without its extension
     name = '.'.join(audio_file.split('.')[:-1])
+    print('Transcribing '+name)
 
     # Transcribe the audio using the provided model
-    segments, info = model.transcribe(audio_file, beam_size=5, word_timestamps=True)
+    segments, info = model.transcribe(audio_file, beam_size=5, word_timestamps=True, )
     
     # Print the detected language and its probability
     print(f"Detected language '{info.language}' with probability {info.language_probability}")
