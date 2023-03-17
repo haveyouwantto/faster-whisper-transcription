@@ -148,11 +148,14 @@ for entry in args.audio_files:
             gen_subtitles(segments, output_file)
 
             # If the detected language is not English, transcribe the audio using translation
-            if not args.no_translate and info.language != 'en':
+            if not args.no_translate and (
+                (args.translate_lang is None and info.language != 'en') or
+                (args.translate_lang is not None and info.language != args.translate_lang)
+                ):
                 if args.translate_lang is not None:
                     segments, info = model.transcribe(audio_file, beam_size=5, language=args.translate_lang, word_timestamps=True) #args.trans_word_ts)
                 else:
-                    segments, info = model.transcribe(audio_file, beam_size=5, task='translate', word_timestamps=args.trans_word_ts)
+                    segments, info = model.transcribe(audio_file, beam_size=5, task='translate', word_timestamps=True)
 
                 # output_file = f"{name}.en.translated"
 
