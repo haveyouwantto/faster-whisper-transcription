@@ -115,15 +115,15 @@ def gen_subtitles(segments, outname, append=False):
                     last_end = ed
         
         # Handling of https://github.com/guillaumekln/faster-whisper/issues/50
-        except IndexError:
-            print(IndexError)
+        except IndexError as e:
+            print(e)
         
         # Close the output file
         # f.close()
         # if word_ts:
         t.close()
     else:
-        f"Skipping {filename} (file already exists). Use --force-overwrite to overwrite existing files."
+        print(f"Skipping {filename} (file already exists). Use --force-overwrite to overwrite existing files.")
 
 # Iterate through each audio file provided in the command line arguments
 for audio_file in args.audio_files:
