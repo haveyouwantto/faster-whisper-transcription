@@ -21,7 +21,7 @@ ScaledBorderAndShadow: yes
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Default,Sans,16,&H00FFFFFF,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,2,50,50,22,1
-Style: Small,Sans,8,&H00FFFFFF,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,8,50,50,260,1
+Style: Small,Sans,10,&H00FFFFFF,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,8,50,50,260,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -56,7 +56,8 @@ def gen_subtitles(segments, outname, append=False):
     t = open(outname + '.ass', 'a' if append else 'w', encoding='utf-8')
 
     # Write the ASS subtitle file header
-    t.write(ass_header)
+    if not append:
+        t.write(ass_header)
 
     # Set the style based on whether the subtitle is being appended or not
     style = 'Small' if append else 'Default'
