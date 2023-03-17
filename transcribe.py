@@ -1,14 +1,14 @@
 import argparse
-from faster_whisper import WhisperModel
 
 parser = argparse.ArgumentParser()
 parser.add_argument('audio_files', nargs='+', help='Audio files to transcribe')
-parser.add_argument('--model_path', default='whisper-large-v2-ct2/', help='Path to model')
+parser.add_argument('--model_path', default='whisper-large-v2-ct2/', help='Path to model (default: whisper-large-v2-ct2/)')
 parser.add_argument('--device', default='cuda', help='Device to use for inference (default: cuda)')
 parser.add_argument('--compute_type', default='float16', help='Compute type for inference (default: float16)')
-parser.add_argument('--translate', action='store_true', help='Translate the transcription to English')
+parser.add_argument('--no-translate', action='store_true', help='Disable automatic translation')
 args = parser.parse_args()
 
+from faster_whisper import WhisperModel
 model = WhisperModel(args.model_path, device=args.device, compute_type=args.compute_type)
 
 ass_header = '''
@@ -20,8 +20,8 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Sans,16,&H00FFFFFF,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,2,50,50,22,1
-Style: Small,Sans,10,&H00FFFFFF,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,8,50,50,260,1
+Style: Default,Sans,16,&H00FFFFFF,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,2,50,50,24,1
+Style: Small,Sans,10,&H00FFFFFF,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,8,50,50,258,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -75,7 +75,7 @@ def gen_subtitles(segments, outname, append=False):
         line = f"{i+1}\n{start_time} --> {end_time}\n{text}"
 
         # Print the segment information to the console
-        print("[%.2f -> %.2f] %s" % (segment.start, segment.end, segment.text))
+        print("[%s -> %s] %s" % (start_time, end_time, segment.text))
 
         # Write the subtitle line to the output file
         # f.write(line+'\n\n')
@@ -130,7 +130,7 @@ for audio_file in args.audio_files:
     gen_subtitles(segments, output_file)
 
     # If the detected language is not English, transcribe the audio using translation
-    if info.language != 'en':
+    if not args.no_translate and info.language != 'en':
         segments, info = model.transcribe(audio_file, beam_size=5, task='translate', word_timestamps=True)
 
         # output_file = f"{name}.en.translated"
