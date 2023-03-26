@@ -1,7 +1,7 @@
 # faster-whisper-transcribe
 Speed up and Improve Accuracy of Whisper Transcription with Faster-Whisper Model
 
-This efficient script utilizes the Faster-Whisper model (available at https://github.com/guillaumekln/faster-whisper) to generate highly accurate word-level ASS subtitles. By leveraging this model, the script achieves a significant speed-up compared to original Whisper model. Before running the script, be sure to follow the installation instructions for Faster-Whisper.
+This efficient script utilizes the Faster-Whisper model (available at https://github.com/guillaumekln/faster-whisper) to generate highly accurate word-level ASS subtitles. By leveraging this model, the script achieves a significant speed-up and lower VRAM usage compared to original Whisper model. Before running the script, be sure to follow the installation instructions for Faster-Whisper.
 
 ## Example Usage
 
@@ -18,7 +18,7 @@ python3 transcribe.py *.flac -f -l ja -t zh
 
 使用 Faster-Whisper 模型提高Whisper识别的速度和准确性
 
-这个高效的脚本利用 Faster-Whisper 模型（可在 [https://github.com/guillaumekln/faster-whisper](https://github.com/guillaumekln/faster-whisper)  获取）生成高度准确的单词级别 ASS 字幕。通过这个模型，该脚本相比原版Whisper模型实现了显著的加速。在运行脚本之前，请确保按照 Faster-Whisper 的安装说明进行安装。
+这个高效的脚本利用 Faster-Whisper 模型（可在 [https://github.com/guillaumekln/faster-whisper](https://github.com/guillaumekln/faster-whisper)  获取）生成高度准确的单词级别 ASS 字幕。通过这个模型，该脚本相比原版Whisper模型实现了更高的效率和更低的显存占用。在运行脚本之前，请确保按照 Faster-Whisper 的安装说明进行安装。
 ## 使用示例
 
 ```bash
