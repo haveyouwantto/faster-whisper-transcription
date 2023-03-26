@@ -9,7 +9,7 @@ This efficient script utilizes the Faster-Whisper model (available at https://gi
 python3 transcribe.py *.flac -f -l ja -t zh
 ```
 
-`*.flac`: Indicates that all files in the current directory with the file extension ".flac" will be translated.
-`-f`: Indicates that the instruction will be forcefully executed, overwriting the output target file if it already exists.
-`-l ja`: Indicates that the input language is Japanese.
-`-t zh`: Indicates that the input language will be translated into Chinese.
+* `*.flac`: Indicates that all files in the current directory with the file extension ".flac" will be translated.
+* `-f`: Indicates that the instruction will be forcefully executed, overwriting the output target file if it already exists.
+* `-l ja`: Indicates that the input language is Japanese.
+* `-t zh`: Indicates that the input language will be translated into Chinese.
