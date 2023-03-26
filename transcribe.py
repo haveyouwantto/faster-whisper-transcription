@@ -8,7 +8,8 @@ parser.add_argument('--compute_type', default='float16', help='Compute type for 
 parser.add_argument('--no-translate', action='store_true', help='Disable automatic translation')
 # parser.add_argument('--trans-word-ts', action='store_true', help='If set, the program will generate word-level timestamps for translations. It may be unreliable.')
 parser.add_argument('--force-overwrite','-f', action='store_true', help='If set, the program will overwrite any existing output files. If not set (default behavior), the program will skip writing to an output file that already exists.')
-parser.add_argument('--translate-lang', default=None, help='Translate to another language other than English. This is not an official behavior.')
+parser.add_argument('--translate-lang','-t', default=None, help='Translate to another language other than English. This is not an official behavior.')
+parser.add_argument('--language','-l', default=None, help='Force language')
 args = parser.parse_args()
 import os
 import glob
@@ -134,14 +135,20 @@ for entry in args.audio_files:
         name = '.'.join(audio_file.split('.')[:-1])
         print('Transcribing '+name)
 
-        # Transcribe the audio using the provided model
-        segments, info = model.transcribe(audio_file, beam_size=5, word_timestamps=True)
+        if args.language is None:
+            # Transcribe the audio using the provided model
+            segments, info = model.transcribe(audio_file, beam_size=5, word_timestamps=True)
+            
+            # Print the detected language and its probability
+            print(f"Detected language '{info.language}' with probability {info.language_probability}")
         
-        # Print the detected language and its probability
-        print(f"Detected language '{info.language}' with probability {info.language_probability}")
+            language = info.language
+        else:
+            segments, info = model.transcribe(audio_file, beam_size=5, word_timestamps=True, language=args.language)
+            language = args.language
         
         # Generate subtitles file with the same name as the original audio file and the detected language as the extension
-        output_file = f"{name}.{info.language}.ass"
+        output_file = f"{name}.{language}.ass"
 
         if args.force_overwrite or not os.path.exists(output_file):
             
@@ -149,8 +156,8 @@ for entry in args.audio_files:
 
             # If the detected language is not English, transcribe the audio using translation
             if not args.no_translate and (
-                (args.translate_lang is None and info.language != 'en') or
-                (args.translate_lang is not None and info.language != args.translate_lang)
+                (args.translate_lang is None and language != 'en') or
+                (args.translate_lang is not None and language != args.translate_lang)
                 ):
                 if args.translate_lang is not None:
                     segments, info = model.transcribe(audio_file, beam_size=5, language=args.translate_lang, word_timestamps=True) #args.trans_word_ts)
@@ -166,4 +173,4 @@ for entry in args.audio_files:
             print(f"Subtitles saved to {output_file}")
 
         else:
-            print(f"Skipping {output_file} (file already exists). Use --force-overwrite to overwrite existing files.")
+            print(f"Skipping {output_file} (file already exists). Pass -f to overwrite existing files.")
