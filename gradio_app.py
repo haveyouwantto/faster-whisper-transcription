@@ -238,12 +238,17 @@ def generate_subtitles(audio_files,
 audio_files = gr.Files(label="Audio or video files to transcribe",
                        file_types=['audio', 'video', '.flv'])
 translate_lang = gr.Dropdown(choices=supported_languages,
-                             label="Translate to language")
-language = gr.Dropdown(choices=supported_languages, label="Force language")
-translate = gr.Checkbox(label="Automatic translation", value=True)
-word_ts = gr.Checkbox(label="Word-level timestamps", value=True)
-attach = gr.Checkbox(label="Attach subtitles to the output video")
-beam_size = gr.Number(label="Beam size", value=5, precision=0)
+                             label="Translate to language", info="Select a language to translate the subtitles to.")
+language = gr.Dropdown(choices=supported_languages, label="Force language",
+                              info="Force the language used for transcription.")
+translate = gr.Checkbox(label="Automatic translation", value=True,
+                               info="Enable or disable automatic translation of the subtitles.")
+word_ts = gr.Checkbox(label="Word-level timestamps", value=True,
+                             info="Generate timestamps for each word in the subtitles.")
+attach = gr.Checkbox(label="Produce a video with embedded subtitles",
+                            info="Attach the subtitles to the video and produce a new video file.")
+beam_size = gr.Number(label="Beam size", value=5, precision=0,
+                              info="Set the beam size for transcription. Higher beam size produces more accurate but slower results.")
 
 output_text = gr.Files(label='Output subtitle files')
 
