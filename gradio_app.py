@@ -226,7 +226,7 @@ def generate_subtitles(audio_files,
                 audio_file: None,
                 output_file: None
             },
-                              outputs={embed: ['-c', 'copy']})
+                              outputs={embed: ['-c', 'copy', '-metadata:s:s:0',f'language={language}','-y']})
             ff.run()
             output_files.append(embed)
         else:
