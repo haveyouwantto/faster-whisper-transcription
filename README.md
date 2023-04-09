@@ -1,9 +1,16 @@
 # faster-whisper-transcribe
-Speed up and Improve Accuracy of Whisper Transcription with Faster-Whisper Model
+Gradio WebUI for Faster Whisper model
 
 This efficient script utilizes the Faster-Whisper model (available at https://github.com/guillaumekln/faster-whisper) to generate highly accurate word-level ASS subtitles. By leveraging this model, the script achieves a significant speed-up and lower VRAM usage compared to original Whisper model. Before running the script, be sure to follow the installation instructions for Faster-Whisper.
 
-## Example Usage
+![ui](ui.png)
+
+## Run
+
+You can run this app by running `gradio_app.py`.
+Before first run, make sure to install all the dependencies by running `pip install -r requirements.txt`.
+
+## Command line Usage
 
 ```bash
 python3 transcribe.py *.flac -f -l ja -t zh
@@ -16,10 +23,16 @@ python3 transcribe.py *.flac -f -l ja -t zh
 
 -----
 
-使用 Faster-Whisper 模型提高Whisper识别的速度和准确性
+利用Gradio编写的Faster-Whisper模型WebUI
 
 这个高效的脚本利用 Faster-Whisper 模型（可在 [https://github.com/guillaumekln/faster-whisper](https://github.com/guillaumekln/faster-whisper)  获取）生成高度准确的单词级别 ASS 字幕。通过这个模型，该脚本相比原版Whisper模型实现了更高的效率和更低的显存占用。在运行脚本之前，请确保按照 Faster-Whisper 的安装说明进行安装。
-## 使用示例
+
+## 运行
+
+你可以通过运行`gradio_app.py`来启动WebUI。
+在首次运行前，请先确保安装所有依赖，通过`pip install -r requirements.txt`来安装。
+
+## 命令行使用示例
 
 ```bash
 python3 transcribe.py *.flac -f -l ja -t zh
