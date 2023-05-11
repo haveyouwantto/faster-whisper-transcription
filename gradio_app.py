@@ -7,7 +7,7 @@ from assgen import gen_subtitles
 from faster_whisper import WhisperModel
 
 print("Loading model...")
-model = WhisperModel(model_path='whisper-large-v2-ct2/',
+model = WhisperModel('whisper-large-v2-ct2/',
                      device='cuda',
                      compute_type='float16')
 
