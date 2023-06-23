@@ -6,6 +6,10 @@ parser.add_argument('--model_path',
                     '-m',
                     default='whisper-large-v2-ct2/',
                     help='Path to model (default: whisper-large-v2-ct2/)')
+parser.add_argument('--output-format',
+                    '-o',
+                    default='ass',
+                    help='Output format (default: ass)')
 parser.add_argument('--device',
                     '-d',
                     default='cuda',
@@ -45,8 +49,7 @@ model = WhisperModel(args.model_path,
                      device=args.device,
                      compute_type=args.compute_type)
 
-from assgen import gen_subtitles
-
+from assgen import gen_ass, gen_lrc
 
 imported = False
 
@@ -77,24 +80,28 @@ for entry in args.audio_files:
             language = args.language
 
         # Generate subtitles file with the same name as the original audio file and the detected language as the extension
-        output_file = f"{name}.{language}.ass"
+        output_file = f"{name}.{language}.{args.output_format}"
 
         if args.force_overwrite or not os.path.exists(output_file):
 
             # Generate ass file
-            raw_segments = gen_subtitles(segments, output_file)
+            if args.output_format == 'ass':
+                raw_segments = gen_ass(segments, output_file)
+            elif args.output_format == 'lrc':
+                raw_segments = gen_lrc(segments, output_file)
 
             # write raw result to json file
-            with open(f'{name}.{language}.json','w',encoding='utf-8') as json_output:
+            with open(f'{name}.{language}.json', 'w',
+                      encoding='utf-8') as json_output:
                 results = []
                 for e in raw_segments:
                     results.append({
-                        'start':e.start,
-                        'end':e.end,
-                        'text':e.text
+                        'start': e.start,
+                        'end': e.end,
+                        'text': e.text
                     })
 
-                json.dump(results,json_output)
+                json.dump(results, json_output)
 
             # If the detected language is not English, transcribe the audio using translation
             if not args.no_translate and (
@@ -110,14 +117,15 @@ for entry in args.audio_files:
                         word_timestamps=True)  #args.trans_word_ts)
                 else:
                     segments, info = model.transcribe(audio_file,
-                                                        beam_size=5,
-                                                        task='translate',
-                                                        word_timestamps=True)
+                                                      beam_size=5,
+                                                      task='translate',
+                                                      word_timestamps=True)
 
                 # output_file = f"{name}.en.translated"
 
                 # Append English translation
-                gen_subtitles(segments, output_file, append=True)
+                if args.output_format == 'ass':
+                    gen_ass(segments, output_file, append=True)
 
             # Print the name of the output subtitle file
             print(f"Subtitles saved to {output_file}")

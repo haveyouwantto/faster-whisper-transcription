@@ -14,7 +14,6 @@ Style: Small,Sans,10,&H00FFFFFF,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 '''
 
-
 def format_srt_time(seconds):
     ms = seconds % 1
     s = int(seconds % 60)
@@ -72,6 +71,14 @@ def format_ass_word(segment, size):
 
     return '\n'.join(ret)
 
+def format_lrc_time(time):
+    minutes = int(time / 60)
+    seconds = int(time % 60)
+    milliseconds = int((time - int(time)) * 1000)
+    return f"[{minutes:02d}:{seconds:02d}.{milliseconds:03d}]"
+
+def lrc_write(file, word, time):
+    file.write(f'{format_lrc_time(time)}{word}')
 
 def print_segment(segment, i):
 
@@ -86,7 +93,7 @@ def print_segment(segment, i):
 # This function generates an ASS subtitle file for a list of segments.
 # It takes the segments, the output file name, and an optional boolean argument to indicate if the subtitle
 # should be appended to an existing file instead of overwriting it.
-def gen_subtitles(segments, outname, append=False):
+def gen_ass(segments, outname, append=False):
     # Open the output file for writing or appending
     subtitle_file = open(outname, 'a' if append else 'w', encoding='utf-8')
 
@@ -127,4 +134,77 @@ def gen_subtitles(segments, outname, append=False):
     # Close the output file
     # f.close()
     # if word_ts:
+    subtitle_file.close()
+
+def gen_lrc(segments, outname, append=False):
+    # Open the output file for writing or appending
+    subtitle_file = open(outname, 'a' if append else 'w', encoding='utf-8')
+
+    try:
+        segment_result = []
+        # Iterate through each segment and generate the corresponding subtitle lines
+        for i, segment in enumerate(segments):
+            segment_result.append(segment)
+
+            # Print the segment information to the console
+            print_segment(segment, i)
+
+            # Write the subtitle line to the output file
+            if segment.words is not None:
+                for word in segment.words:
+                    lrc_write(subtitle_file, word.word, word.start)
+                lrc_write(subtitle_file, '\n', segment.end)
+            else:
+                lrc_write(subtitle_file, segment.text+'\n', segment.start)
+
+        return segment_result
+
+    except IndexError as e:
+        print(e)
+
+    # Close the output file
+    subtitle_file.close()
+
+
+
+def gen_json(segments, outname, append=False):
+    import json
+    # Open the output file for writing or appending
+    subtitle_file = open(outname, 'a' if append else 'w', encoding='utf-8')
+
+    try:
+        segment_result = []
+        # Iterate through each segment and generate the corresponding subtitle lines
+        for i, segment in enumerate(segments):
+            segment_data = {
+                "start":segment.start,
+                "end":segment.end,
+                "text":segment.text,
+                "words":[]
+            }
+
+            # Print the segment information to the console
+            print_segment(segment, i)
+
+            # Write the subtitle line to the output file
+            if segment.words is not None:
+                for word in segment.words:
+                    segment_data['words'].append({
+                        "start":word.start,
+                        "end":word.end,
+                        "word":word.word
+                    })
+                # lrc_write(subtitle_file, f' / {translate(segment.text)}\n', segment.end)
+            else:
+                pass
+
+            segment_result.append(segment_data)
+        json.dump(segment_result,subtitle_file)
+
+        return segment_result
+
+    except IndexError as e:
+        print(e)
+
+    # Close the output file
     subtitle_file.close()
