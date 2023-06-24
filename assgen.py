@@ -22,8 +22,8 @@ Style: Highlight-Small,Sans,10,&H009628E6,&H000019FF,&H00000000,&H00000000,1,0,0
 adorable_theme = '''Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Original,RocknRoll One,18,&H00FFFFFF,&H000019FF,&H009984F0,&H00000000,1,0,0,0,100,100,0,0,1,0.6,0,2,50,50,24,1
 Style: Small,RocknRoll One,10,&H00FFFFFF,&H000019FF,&H00FBAB7E,&H00000000,1,0,0,0,100,100,0,0,1,0.6,0,8,50,50,260,1
-Style: Highlight-Original,RocknRoll One,24,&H009984F0,&H000019FF,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,0.6,0,2,50,50,24,1
-Style: Highlight-Small,RocknRoll One,13,&H00FBAB7E,&H000019FF,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,0.6,0,8,50,50,260,1
+Style: Highlight-Original,RocknRoll One,24,&H009984F0,&H000019FF,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,2,50,50,24,1
+Style: Highlight-Small,RocknRoll One,13,&H00FBAB7E,&H000019FF,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,8,50,50,260,1
 '''
 
 def format_srt_time(seconds):
@@ -112,7 +112,7 @@ def gen_ass(segments, outname, append=False):
 
     # Write the ASS subtitle file header
     if not append:
-        subtitle_file.write(ass_header.format(default_theme))
+        subtitle_file.write(ass_header.format(adorable_theme))
 
     # Set the style based on whether the subtitle is being appended or not
     style = 'Small' if append else 'Original'
