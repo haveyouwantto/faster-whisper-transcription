@@ -6,12 +6,24 @@ WrapStyle: 0
 ScaledBorderAndShadow: yes
 
 [V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Sans,16,&H00FFFFFF,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,2,50,50,24,1
-Style: Small,Sans,10,&H00FFFFFF,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,8,50,50,258,1
+{0}
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+'''
+
+default_theme = '''Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Original,Sans,16,&H00FFFFFF,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,2,50,50,24,1
+Style: Small,Sans,10,&H00FFFFFF,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,8,50,50,258,1
+Style: Highlight-Original,Sans,16,&H009628E6,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,2,50,50,24,1
+Style: Highlight-Small,Sans,10,&H009628E6,&H000019FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,8,50,50,258,1
+'''
+
+adorable_theme = '''Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Original,RocknRoll One,18,&H00FFFFFF,&H000019FF,&H009984F0,&H00000000,1,0,0,0,100,100,0,0,1,0.6,0,2,50,50,24,1
+Style: Small,RocknRoll One,10,&H00FFFFFF,&H000019FF,&H00FBAB7E,&H00000000,1,0,0,0,100,100,0,0,1,0.6,0,8,50,50,258,1
+Style: Highlight-Original,RocknRoll One,24,&H009984F0,&H000019FF,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,0.6,0,2,50,50,24,1
+Style: Highlight-Small,RocknRoll One,13,&H00FBAB7E,&H000019FF,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,0.6,0,8,50,50,258,1
 '''
 
 def format_srt_time(seconds):
@@ -58,8 +70,8 @@ def format_ass_word(segment, size):
         # Insert the formatting codes for the word in the segment text
         wordlen = len(word.word)
         text = list(segment.text)
-        text.insert(pos + wordlen, '{\c}')
-        text.insert(pos, '{\c&H9628E6&}')
+        text.insert(pos + wordlen, '{\\r}')
+        text.insert(pos, '{\\rHighlight-'+ size +'}')
 
         # Create the subtitle line for the word
         line = f"Dialogue: 0,{start_time},{end_time},{size},,0,0,0,,{''.join(text)}"
@@ -99,10 +111,10 @@ def gen_ass(segments, outname, append=False):
 
     # Write the ASS subtitle file header
     if not append:
-        subtitle_file.write(ass_header)
+        subtitle_file.write(ass_header.format(adorable_theme))
 
     # Set the style based on whether the subtitle is being appended or not
-    style = 'Small' if append else 'Default'
+    style = 'Small' if append else 'Original'
 
     try:
         segment_result = []
