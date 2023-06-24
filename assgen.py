@@ -23,7 +23,7 @@ adorable_theme = '''Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryCo
 Style: Original,RocknRoll One,18,&H00FFFFFF,&H000019FF,&H009984F0,&H00000000,1,0,0,0,100,100,0,0,1,0.6,0,2,50,50,24,1
 Style: Small,RocknRoll One,10,&H00FFFFFF,&H000019FF,&H00FBAB7E,&H00000000,1,0,0,0,100,100,0,0,1,0.6,0,8,50,50,260,1
 Style: Highlight-Original,RocknRoll One,24,&H009984F0,&H000019FF,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,2,50,50,24,1
-Style: Highlight-Small,RocknRoll One,13,&H00FBAB7E,&H000019FF,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,0.8,0,8,50,50,260,1
+Style: Highlight-Small,RocknRoll One,13,&H00FBAB7E,&H000019FF,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,0.7,0,8,50,50,260,1
 '''
 
 def format_srt_time(seconds):
